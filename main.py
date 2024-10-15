@@ -2,6 +2,11 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
+# This function will be changed in the future
+def generateDeviation(x):
+    deviation = round((x + np.random.normal(0, 0.1)), 2)
+    return deviation
+
 # Period is the length of the wave
 period = 6 * math.pi
 # Length is the number of points in the x-axis
@@ -12,11 +17,26 @@ step = period / length
 sin = [math.sin(x) for x in np.arange(0, period, step)]
 
 # Create a figure and axis
-figure, axis = plt.subplots(1,1)
+figure, axis = plt.subplots(2, 1)
 
 # Plot the sine wave
-axis.plot(sin)
-axis.set_title('Sine Wave')
-axis.set_xlabel('X')
-axis.legend(['sin(x)'])
+axis[0].plot(sin)
+axis[0].set_title('Sine Wave')
+axis[0].set_xlabel('X')
+axis[0].legend(['sin(x)'])
+
+# Generate the deviation of the sine wave for every 10th point
+deviation = [generateDeviation(sin[i]) if i % 10 == 0 else None for i in range(len(sin))]
+deviation_points = [(i, deviation[i]) for i in range(len(deviation)) if deviation[i] is not None]
+
+# Plot the deviation points as individual points
+x_points = [point[0] for point in deviation_points]
+y_points = [point[1] for point in deviation_points]
+axis[1].plot(sin)
+axis[1].plot(x_points, y_points, linestyle='none', marker='o', markersize=3, color='red')
+axis[1].set_title('Sine Wave with Deviation')
+axis[1].set_xlabel('X')
+axis[1].legend(['sin(x) with Deviation'])
+
+plt.tight_layout()
 plt.show()
