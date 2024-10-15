@@ -4,7 +4,9 @@ import numpy as np
 
 # This function will be changed in the future
 def generateDeviation(x):
-    deviation = round((x + np.random.normal(0, 0.1)), 2)
+    deviation = -6 * np.random.uniform(0, 1/math.sqrt(6)) + 1/math.sqrt(6)
+    if deviation > 0.5:
+        deviation *= -1
     return deviation
 
 # Period is the length of the wave
@@ -26,7 +28,7 @@ axis[0].set_xlabel('X')
 axis[0].legend(['sin(x)'])
 
 # Generate the deviation of the sine wave for every 10th point
-deviation = [generateDeviation(sin[i]) if i % 10 == 0 else None for i in range(len(sin))]
+deviation = [generateDeviation() if i % 10 == 0 else None for i in range(len(sin))]
 deviation_points = [(i, deviation[i]) for i in range(len(deviation)) if deviation[i] is not None]
 
 # Plot the deviation points as individual points
