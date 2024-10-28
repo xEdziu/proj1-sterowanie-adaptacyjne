@@ -25,33 +25,17 @@ sin = [amplitude * math.sin(x) for x in np.arange(0, period, step)]
 uValues = open("uValues.txt", 'r').read().splitlines()
 uValues = [float(i) for i in uValues]
 
-# wartości od 0.1 do 10.0 z krokiem 0.1
-variance_values = np.arange(0, 2.1, 0.1)
+# wartości od 0.0 do 2.1 z krokiem 0.1
+variance_values = np.arange(0.0, 2.1, 0.1)
 
 # Funkcje do obliczania średniej ruchomej
 def moving_average(signal, H):
     smoothed_signal = []
     for i in range(len(signal)):
-        # Filtrujemy tylko istniejące wartości (nie `None`)
-        window = [signal[j] for j in range(max(0, i - H + 1), i + 1) if signal[j] is not None]
-        # Obliczamy średnią tylko, jeśli mamy jakieś wartości
-        smoothed_signal.append(np.mean(window) if window else None)
+        window = [signal[j] for j in range(max(0, i - H + 1), i + 1)]
+        smoothed_signal.append(np.mean(window))
     return smoothed_signal
 
-# Funkcja do obliczania średniej ruchomej z H ostatnich punktów, nawet jeśli niektóre z nich są `None`
-def moving_average_with_None(signal, H):
-    smoothed_signal = []
-    for i in range(len(signal)):
-        # Wyznaczamy zakres okna do uśredniania
-        start = max(0, i - H + 1)
-        end = i + 1
-        window = [signal[j] for j in range(start, end) if signal[j] is not None]
-        if not window:
-            estimated_value = np.mean([x for x in signal if x is not None])
-        else:
-            estimated_value = np.mean(window)
-        smoothed_signal.append(estimated_value)
-    return smoothed_signal
 
 # Funkcja do obliczania MSE
 def calculate_mse(original, smoothed):
@@ -67,11 +51,8 @@ for variance in variance_values:
     copyOfUValues = uValues.copy()
     variance = round(variance, 1)
     print(f'Calculating for Variance: {variance}')
-    # Generowanie zaszumionego sygnału tylko dla co 10. punktu
-    #noisy_signal = [sin[i] + generateDeviation(variance) if i % 10 == 0 else None 
-                    #for i in enumerate(np.arange(0, period, step))]
     
-    noisy_signal = [sin[i] + generateDeviation(variance, copyOfUValues.pop(0)) for i, x in enumerate(np.arange(0, period, step))]
+    noisy_signal = [sin[i] + generateDeviation(variance, copyOfUValues.pop(0)) for i, tmp in enumerate(np.arange(0, period, step))]
 
     H_values = range(1, 100)
     mse_values = []
