@@ -2,10 +2,9 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
-def generateDeviation(variance):
+def generateDeviation(variance, u):
     # Generujemy odchylenie na podstawie wartości sinusoidy w punkcie x
     c = math.sqrt(6 * variance)  # Stała do obliczenia odchylenia
-    u = np.random.random()  # losowa wartość z zakresu [0, 1)
     if u <= 0.5:
         base_deviation = c * (math.sqrt(2 * u) - 1)
     else:
@@ -22,6 +21,9 @@ length = 1000
 step = period / length
 # Definicja fali sinusoidalnej
 sin = [amplitude * math.sin(x) for x in np.arange(0, period, step)]
+
+uValues = open("uValues.txt", 'r').read().splitlines()
+uValues = [float(i) for i in uValues]
 
 # wartości od 0.1 do 10.0 z krokiem 0.1
 variance_values = np.arange(0, 2.1, 0.1)
@@ -60,12 +62,16 @@ def calculate_mse(original, smoothed):
 optimal_H_values = []
 optimal_mse_values = []
 
+
 for variance in variance_values:
+    copyOfUValues = uValues.copy()
     variance = round(variance, 1)
     print(f'Calculating for Variance: {variance}')
     # Generowanie zaszumionego sygnału tylko dla co 10. punktu
-    noisy_signal = [sin[i] + generateDeviation(variance) if i % 10 == 0 else None 
-                    for i, x in enumerate(np.arange(0, period, step))]
+    #noisy_signal = [sin[i] + generateDeviation(variance) if i % 10 == 0 else None 
+                    #for i in enumerate(np.arange(0, period, step))]
+    
+    noisy_signal = [sin[i] + generateDeviation(variance, copyOfUValues.pop(0)) for i, x in enumerate(np.arange(0, period, step))]
 
     H_values = range(1, 100)
     mse_values = []
@@ -82,8 +88,8 @@ for variance in variance_values:
 
     # Wykres zaszumionego sygnału
     plt.figure()
-    plt.plot(sin, label='Original Signal', linestyle='solid', color='blue')
     plt.plot([x if x is not None else np.nan for x in noisy_signal], label='Noisy Signal', color='red', linestyle='solid', marker='o', markersize=1)
+    plt.plot(sin, label='Original Signal', linestyle='solid', color='blue')
     plt.title(f'Noisy Signal (Variance={variance})')
     plt.xlabel('X')
     plt.legend()
@@ -93,8 +99,8 @@ for variance in variance_values:
 
     # Wykres wygładzonego sygnału dla optymalnego H
     plt.figure()
-    plt.plot(sin, label='Original Signal', linestyle='solid', color='blue')
     plt.plot([x if x is not None else np.nan for x in smoothed_best], label=f'Smoothed Signal (H={best_H})', color='green')
+    plt.plot(sin, label='Original Signal', linestyle='solid', color='blue')
     plt.title(f'Smoothed Signal with Optimal H={best_H} (Variance={variance})')
     plt.xlabel('X')
     plt.legend()
